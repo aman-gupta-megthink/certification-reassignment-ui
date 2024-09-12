@@ -8,53 +8,57 @@ import {
   Autocomplete,
 } from "@mui/material";
 import apiClient from "../../api/axiosConfig";
-import { Identites, Identity} from "../../interfaces/identities";
+import { Identites, Identity } from "../../interfaces/identities";
 import debounce from "lodash.debounce";
+import { CampaignCertification } from "../../interfaces/campaignCertifications";
 
 interface ReassignmentModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (reassignTo: Identity|null|undefined, reason: string) => void;
+  onSubmit: (reassignTo: Identity | null | undefined, reason: string) => void;
+  selectedCampaignDetail: CampaignCertification | undefined;
 }
 
 const ReassignmentModal: React.FC<ReassignmentModalProps> = ({
   open,
   onClose,
   onSubmit,
+  selectedCampaignDetail,
 }) => {
-  const [reassignTo, setReassignTo] = useState<Identity|null|undefined>();
+  const [reassignTo, setReassignTo] = useState<Identity | null | undefined>();
   const [reason, setReason] = useState<string>("");
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [options, setOptions] = useState<Identites>([]);
 
   useEffect(() => {
     if (open) {
-        fetchOptions('');
+      fetchOptions("");
     }
-}, [open]);
+  }, [open]);
 
-const fetchOptions = async (query:string) => {
+  const fetchOptions = async (query: string) => {
     try {
-        const response = await apiClient.get<Identites>(`/v3/public-identities?limit=100&add-core-filters=true&sorters=name&filters=firstname sw "${query}" or lastname sw "${query}" or email sw "${query}"`)
-        setOptions(response.data);
+      const response = await apiClient.get<Identites>(
+        `/v3/public-identities?limit=100&add-core-filters=true&sorters=name&filters=firstname sw "${query}" or lastname sw "${query}" or email sw "${query}"`
+      );
+      setOptions(response.data);
     } catch (error) {
-        console.error('Failed to fetch identites', error);
+      console.error("Failed to fetch identites", error);
     }
-};
+  };
 
-
-const debouncedFetchOptions = useCallback(
+  const debouncedFetchOptions = useCallback(
     debounce((query: string) => {
-        fetchOptions(query);
+      fetchOptions(query);
     }, 300), // Adjust debounce time as needed
     []
-);
+  );
 
-const handleInputChange = (event: React.SyntheticEvent, value: string) => {
+  const handleInputChange = (event: React.SyntheticEvent, value: string) => {
     setSearchValue(value);
-    debouncedFetchOptions(value) 
-};
-  
+    debouncedFetchOptions(searchValue);
+  };
+
   const handleSubmit = () => {
     onSubmit(reassignTo, reason);
     onClose();
@@ -91,13 +95,22 @@ const handleInputChange = (event: React.SyntheticEvent, value: string) => {
         >
           Reassign Certification
         </Typography>
+        <Typography
+          id="reassignment-modal-subtitle"
+          variant="h6"
+          component="h2"
+        >
+          Current Reviewer: {selectedCampaignDetail?.reviewer.name}
+        </Typography>
         <Autocomplete
           disablePortal
           onInputChange={handleInputChange}
           options={options}
           onChange={(event, value) => setReassignTo(value)}
           getOptionLabel={(option) => option.name}
-          renderInput={(params) => <TextField {...params} fullWidth label="Select new Reviewer" />}
+          renderInput={(params) => (
+            <TextField {...params} fullWidth label="Select new Reviewer" />
+          )}
         />
         <TextField
           fullWidth

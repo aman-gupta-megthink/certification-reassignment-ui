@@ -4,7 +4,7 @@ interface ReassignmentButtonProps {
   }
 const ReassignmentButton:React.FC<ReassignmentButtonProps> = ({onReassign}) => {
   return (
-    <Button variant="contained" color="secondary" onClick={onReassign}>
+    <Button variant="contained" color="secondary" onClick={onReassign} sx={{mr:2}}>
         Reassign
     </Button>
   )
