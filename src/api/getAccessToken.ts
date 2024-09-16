@@ -16,6 +16,5 @@ export const getAccessToken = async () => {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },});
-        console.log(response.data)
     return response.data.access_token;
 };
